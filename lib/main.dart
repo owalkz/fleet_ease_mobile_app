@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import 'package:fleet_ease/screens/splash.dart';
+import 'package:fleet_ease/app_theme.dart';
+import 'package:fleet_ease/screens/auth.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -15,27 +16,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme:
-              ColorScheme.fromSeed(seedColor: Color.fromRGBO(30, 58, 138, 1)),
-          useMaterial3: true,
-          textTheme: TextTheme(
-            displayLarge: const TextStyle(
-              fontSize: 72,
-              fontWeight: FontWeight.bold,
-            ),
-            // ···
-            titleLarge: GoogleFonts.oswald(
-              fontSize: 30,
-              fontStyle: FontStyle.italic,
-            ),
-            bodyMedium: GoogleFonts.merriweather(),
-            displaySmall: GoogleFonts.pacifico(),
-            labelLarge: GoogleFonts.oswald(
-              
-            ),
-          ),
-        ),
-        home: const SplashScreen());
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme, // Default Light Theme
+        darkTheme: AppTheme.darkTheme, // Dark Theme
+        themeMode: ThemeMode.system, // Auto-switch based on device settings
+        home: AuthScreen());
   }
 }

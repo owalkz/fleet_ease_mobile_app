@@ -18,9 +18,9 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     Future.delayed(const Duration(seconds: 5), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const AuthScreen(),)
-      );
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (_) => const AuthScreen(),
+      ));
     });
   }
 
@@ -46,8 +46,14 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/truck_no_bg.png'),
-            Image.asset('assets/fleet_ease_logo.png'),
+            Image.asset(
+              'assets/truck_no_bg.png',
+              fit: BoxFit.cover,
+            ),
+            Image.asset(
+              'assets/fleet_ease_logo.png',
+              fit: BoxFit.cover,
+            ),
           ],
         ),
       ),

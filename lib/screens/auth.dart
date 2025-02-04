@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 
 import 'package:fleet_ease/screens/home.dart';
+import 'package:fleet_ease/utils/secure_storage.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -34,14 +35,15 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _checkAuthToken() async {
-    final token = await storage.read(key: 'authToken');
-    if (token != null) {
+    final token = await SecureStorageService().getToken();
+    final userType = await SecureStorageService().getUserType();
+    if (token != null && userType != null) {
       setState(() {
         isAuthenticated = true;
       });
       if (!mounted) return;
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => HomeScreen(userType: userType)));
     }
   }
 
@@ -77,15 +79,20 @@ class _AuthScreenState extends State<AuthScreen> {
         }
         final responseData = json.decode(response.body);
         final token = responseData['token'];
-        await storage.write(key: 'authToken', value: token);
+        final userType = responseData['user']['accountType'];
+        final userId = responseData['user']['_id'];
+        final emailAddress = responseData['user']['emailAddress'];
+        final userName = responseData['user']['name'];
+        await SecureStorageService()
+            .saveUserData(token, userType, userId, userName, emailAddress);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Login successful!'),
           ),
         );
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => HomeScreen(userType: userType)));
       } else {
         // Implement Sign Up Logic
         final url = Uri.parse(
@@ -100,10 +107,6 @@ class _AuthScreenState extends State<AuthScreen> {
             'password': _enteredPassword,
           }),
         );
-
-        final responseData = json.decode(response.body);
-        print(responseData);
-
         if (response.statusCode != 201) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -118,13 +121,17 @@ class _AuthScreenState extends State<AuthScreen> {
             content: Text('Account created successfully!'),
           ),
         );
+        setState(() {
+          _isLogin = true;
+        });
       }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Something went wrong. Please try again later.'),
+          content: Text(
+              'Something went wrong. Please try again later.'),
         ),
       );
     }

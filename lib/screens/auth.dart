@@ -1,5 +1,6 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:fleet_ease/screens/home.dart';
@@ -7,15 +8,16 @@ import 'package:fleet_ease/utils/secure_storage.dart';
 import 'package:fleet_ease/screens/forgot_password.dart';
 
 import 'package:fleet_ease/api/auth_functions.dart';
+import 'package:fleet_ease/providers/auth_provider.dart';
 
-class AuthScreen extends StatefulWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _form = GlobalKey<FormState>();
   final storage = FlutterSecureStorage();
 
@@ -34,14 +36,15 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void _checkAuthToken() async {
     final token = await SecureStorageService().getToken();
-    final userType = await SecureStorageService().getUserType();
-    if (token != null && userType != null) {
+    final userDetails = ref.watch(userNotifierProvider);
+    if (token != null) {
       setState(() {
         isAuthenticated = true;
       });
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => HomeScreen(userType: userType)),
+        MaterialPageRoute(
+            builder: (_) => HomeScreen(userType: userDetails.accountType)),
       );
     }
   }
@@ -54,7 +57,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       final response = _isLogin
-          ? await login(_enteredEmail, _enteredPassword)
+          ? await login(_enteredEmail, _enteredPassword, ref)
           : await register(
               _enteredName, _accountType, _enteredEmail, _enteredPassword);
 
@@ -64,9 +67,9 @@ class _AuthScreenState extends State<AuthScreen> {
             const SnackBar(content: Text('Login successful')),
           );
           if (!mounted) return;
-          final userType = await SecureStorageService().getUserType();
+          final userDetails = ref.watch(userNotifierProvider);
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => HomeScreen(userType: userType!)),
+            MaterialPageRoute(builder: (_) => HomeScreen(userType: userDetails.accountType)),
           );
         } else if (response == 422) {
           ScaffoldMessenger.of(context).showSnackBar(

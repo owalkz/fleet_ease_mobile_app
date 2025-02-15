@@ -1,22 +1,24 @@
+import 'package:fleet_ease/providers/auth_provider.dart';
 import 'package:fleet_ease/screens/trip.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fleet_ease/screens/auth.dart';
 import 'package:fleet_ease/widgets/common_widgets/profile.dart';
 import 'package:fleet_ease/utils/secure_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.userType});
 
   final String userType;
 
   @override
-  State<HomeScreen> createState() {
+  ConsumerState<HomeScreen> createState() {
     return _HomeScreenState();
   }
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _widgetOptions = <Widget>[
@@ -40,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () {
+              ref.watch(userNotifierProvider.notifier).unsetUserDetails();
               SecureStorageService().deleteUserData();
               Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => AuthScreen()));

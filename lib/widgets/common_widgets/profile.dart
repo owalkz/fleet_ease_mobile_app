@@ -1,18 +1,19 @@
+import 'package:fleet_ease/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fleet_ease/widgets/common_widgets/profile_entry.dart';
-import 'package:fleet_ease/utils/secure_storage.dart';
 
 import 'package:fleet_ease/screens/edit_profile.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Profile extends StatefulWidget {
+class Profile extends ConsumerStatefulWidget {
   const Profile({super.key});
 
   @override
-  State<Profile> createState() => _ProfileState();
+  ConsumerState<Profile> createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class _ProfileState extends ConsumerState<Profile> {
   String _name = '';
   String _email = '';
   String _accountType = '';
@@ -24,15 +25,16 @@ class _ProfileState extends State<Profile> {
     _loadUserData();
   }
 
-  void _loadUserData() async {
-    final name = await SecureStorageService().getUserName();
-    final email = await SecureStorageService().getEmailAddress();
-    final accountType = await SecureStorageService().getUserType();
+  void _loadUserData() {
+    final userData = ref.watch(userNotifierProvider);
+    final name = userData.name;
+    final email = userData.emailAddress;
+    final accountType = userData.accountType;
 
     setState(() {
-      _name = name!;
-      _email = email!;
-      _accountType = accountType!;
+      _name = name;
+      _email = email;
+      _accountType = accountType;
       _isLoaded = true;
     });
   }

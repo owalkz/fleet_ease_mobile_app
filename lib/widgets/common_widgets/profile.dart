@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fleet_ease/widgets/common_widgets/profile_entry.dart';
 import 'package:fleet_ease/utils/secure_storage.dart';
 
+import 'package:fleet_ease/screens/edit_profile.dart';
+
 class Profile extends StatefulWidget {
   const Profile({super.key});
 
@@ -65,7 +67,12 @@ class _ProfileState extends State<Profile> {
               height: 60,
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                );
+              },
               icon: Icon(Icons.edit),
               tooltip: 'Edit Profile',
             ),

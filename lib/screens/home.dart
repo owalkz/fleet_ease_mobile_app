@@ -1,3 +1,4 @@
+import 'package:fleet_ease/screens/trip.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fleet_ease/screens/auth.dart';
@@ -20,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _widgetOptions = <Widget>[
     Text('Home Page'),
-    Text('Jobs Page'),
+    TripScreen(),
     Text('Vehicles Page'),
     Profile(),
   ];

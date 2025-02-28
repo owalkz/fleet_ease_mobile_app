@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fleet_ease/utils/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class TripService {
@@ -19,7 +20,9 @@ class TripService {
         }),
       );
       if (response.statusCode == 201) {
-        return jsonDecode(response.body);
+        final res = await jsonDecode(response.body);
+        SharedPrefsHelper.saveTripDetails(res["trip"]["_id"]);
+        return res;
       }
     } catch (e) {
       print("Error starting trip: $e");
@@ -31,6 +34,8 @@ class TripService {
   static Future<void> updateTrip(
       String tripId, double speed, double lat, double lon) async {
     try {
+      print("This has been called");
+      print(tripId);
       await http.put(
         Uri.parse("$baseUrl/update-trip/$tripId"),
         headers: {"Content-Type": "application/json"},
@@ -44,6 +49,7 @@ class TripService {
   // End the trip
   static Future<void> endTrip(String tripId) async {
     try {
+      SharedPrefsHelper.clearTripDetails();
       await http.put(
         Uri.parse("$baseUrl/end-trip/$tripId"),
         headers: {"Content-Type": "application/json"},

@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'package:fleet_ease/providers/auth_provider.dart';
 import 'package:http/http.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fleet_ease/providers/auth_provider.dart';
+import 'package:fleet_ease/utils/shared_preferences.dart';
 import 'package:fleet_ease/utils/secure_storage.dart';
 
 Future<int> login(String emailAddress, String password, WidgetRef ref) async {
@@ -21,10 +22,14 @@ Future<int> login(String emailAddress, String password, WidgetRef ref) async {
     await SecureStorageService().saveUserData(
       responseData['token'],
     );
-    ref.watch(userNotifierProvider.notifier).setUserDetails(
+    ref.read(userNotifierProvider.notifier).setUserDetails(
         responseData['user']['name'],
         responseData['user']['accountType'],
         responseData['user']['emailAddress']);
+    SharedPrefsHelper.saveUserDetails(
+        responseData['user']['name'],
+        responseData['user']['emailAddress'],
+        responseData['user']['accountType']);
     return response.statusCode;
   } catch (error) {
     return 500; // Return 500 in case of error

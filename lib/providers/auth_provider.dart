@@ -3,7 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class UserNotifier extends _$UserNotifier {
   @override
   User build() {
@@ -15,7 +15,7 @@ class UserNotifier extends _$UserNotifier {
   }
 
   void setUserDetails(name, accountType, emailAddress) {
-    state = User(
+    state = state.copyWith(
       name: name,
       accountType: accountType,
       emailAddress: emailAddress,
@@ -23,7 +23,7 @@ class UserNotifier extends _$UserNotifier {
   }
 
   void unsetUserDetails() {
-    state = User(
+    state = state.copyWith(
       name: '',
       accountType: '',
       emailAddress: '',

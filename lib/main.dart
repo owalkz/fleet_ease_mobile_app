@@ -6,10 +6,11 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 import 'package:fleet_ease/app_theme.dart';
 import 'package:fleet_ease/screens/auth.dart';
-import 'package:fleet_ease/utils/trip_service.dart'; // Import trip service
+import 'package:fleet_ease/utils/trip_service.dart';
 import 'package:fleet_ease/utils/shared_preferences.dart';
 
 void main() async {
@@ -24,7 +25,7 @@ void main() async {
 
 void createNotificationChannel() async {
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    "fleet_tracking_channel", // SAME as in `initializeService`
+    "fleet_tracking_channel",
     "Fleet Tracking",
     description: "This channel is used for trip tracking notifications.",
     importance: Importance.high,
@@ -123,8 +124,26 @@ void onStart(ServiceInstance service) async {
     return;
   }
 
+  // ✅ Monitor motion sensors
+  double accelX = 0.0, accelY = 0.0, accelZ = 0.0;
+  double gyroX = 0.0, gyroY = 0.0, gyroZ = 0.0;
+
+  accelerometerEventStream().listen((AccelerometerEvent event) {
+    accelX = event.x;
+    accelY = event.y;
+    accelZ = event.z;
+  });
+
+  gyroscopeEventStream().listen((GyroscopeEvent event) {
+    gyroX = event.x;
+    gyroY = event.y;
+    gyroZ = event.z;
+  });
+
   Timer.periodic(const Duration(seconds: 5), (timer) async {
     print("⏳ Timer is running...");
+    print(accelX);
+    print(gyroZ);
 
     if (service is AndroidServiceInstance &&
         !(await service.isForegroundService())) {
@@ -133,8 +152,6 @@ void onStart(ServiceInstance service) async {
     }
 
     String? currentTripId = prefs.getString(SharedPrefsHelper.keyTripId);
-    print("🔍 Trip ID retrieved: $currentTripId");
-
     if (currentTripId == null) {
       print("❌ No active trip. Stopping timer.");
       timer.cancel(); // ✅ Stop timer when no active trip
@@ -145,13 +162,30 @@ void onStart(ServiceInstance service) async {
     if (position != null) {
       print("📍 Tracking Position: $position");
 
+      // ✅ Detect Dangerous Driving
+      bool harshAcceleration = accelX > 3.5;
+      bool harshBraking = accelX < -3.5;
+      bool suddenCornering = gyroZ.abs() > 1.5;
+      String eventType = "";
+
+      if (harshAcceleration || harshBraking || suddenCornering) {
+        if (harshAcceleration) eventType = "Harsh Acceleration";
+        if (harshBraking) eventType = "Harsh Braking";
+        if (suddenCornering) eventType = "Sudden Cornering";
+
+        print("⚠️ Detected: $eventType");
+      }
       await TripService.updateTrip(
-          currentTripId, position.speed, position.latitude, position.longitude);
-      print("✅ Trip updated successfully.");
+        currentTripId,
+        position.speed,
+        position.latitude,
+        position.longitude,
+        eventType,
+      );
+      print("✅ Trip & Event updated successfully.");
     }
   });
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

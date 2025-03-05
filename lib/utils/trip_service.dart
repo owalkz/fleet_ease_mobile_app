@@ -16,7 +16,7 @@ class TripService {
         body: jsonEncode({
           "driverId": driverId,
           "vehicleId": vehicleId,
-          "startLocation": {"latitude": lat, "longitude": lon}
+          "startLocation": {"latitude": lat, "longitude": lon},
         }),
       );
       if (response.statusCode == 201) {
@@ -31,15 +31,20 @@ class TripService {
   }
 
   // Update trip location & speed
-  static Future<void> updateTrip(
-      String tripId, double speed, double lat, double lon) async {
+  static Future<void> updateTrip(String tripId, double speed, double lat,
+      double lon, String eventType) async {
     try {
       print("This has been called");
       print(tripId);
       await http.put(
         Uri.parse("$baseUrl/update-trip/$tripId"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"speed": speed, "latitude": lat, "longitude": lon}),
+        body: jsonEncode({
+          "speed": speed,
+          "latitude": lat,
+          "longitude": lon,
+          "eventType": eventType
+        }),
       );
     } catch (e) {
       print("Error updating trip: $e");

@@ -1,6 +1,8 @@
 import 'package:fleet_ease/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 
+import 'package:fleet_ease/utils/shared_preferences.dart';
+
 import 'package:fleet_ease/widgets/common_widgets/profile_entry.dart';
 
 import 'package:fleet_ease/screens/edit_profile.dart';
@@ -23,13 +25,13 @@ class Profile extends ConsumerWidget {
             backgroundColor: Colors.purpleAccent,
           ),
           const SizedBox(height: 40),
-          ProfileEntry(displayText: userData.name, displayIcon: Icons.person),
+          ProfileEntry(displayText: SharedPrefsHelper.getUserName()!, displayIcon: Icons.person),
           const SizedBox(height: 10),
           ProfileEntry(
-              displayText: userData.emailAddress, displayIcon: Icons.mail),
+              displayText: SharedPrefsHelper.getUserEmail()!, displayIcon: Icons.mail),
           const SizedBox(height: 10),
           ProfileEntry(
-              displayText: userData.accountType,
+              displayText: SharedPrefsHelper.getUserAccountType()!,
               displayIcon: Icons.account_box_sharp),
           const SizedBox(height: 60),
           IconButton(

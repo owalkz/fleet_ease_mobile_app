@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fleet_ease/screens/trip.dart';
+import 'package:fleet_ease/screens/vehicle.dart';
 import 'package:fleet_ease/providers/auth_provider.dart';
 import 'package:fleet_ease/screens/auth.dart';
 import 'package:fleet_ease/widgets/common_widgets/profile.dart';
@@ -11,7 +12,7 @@ import 'package:fleet_ease/utils/shared_preferences.dart';
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.userType});
 
-  final String userType;
+  final String userType; 
 
   @override
   ConsumerState<HomeScreen> createState() {
@@ -33,7 +34,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final List<Widget> widgetOptions = <Widget>[
       Text('Home Page'),
       TripScreen(),
-      Text(widget.userType == 'manager' ? 'Vehicles Page' : 'My Vehicle Page'),
+      VehicleListScreen(userType: widget.userType),
       Profile(),
     ];
 
@@ -69,7 +70,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.directions_car),
-            label: widget.userType == 'manager' ? 'Vehicles' : 'My Vehicle',
+            label: SharedPrefsHelper.getUserAccountType() == 'manager'
+                ? 'Vehicles'
+                : 'My Vehicle',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

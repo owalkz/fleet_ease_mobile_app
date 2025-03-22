@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:fleet_ease/utils/secure_storage.dart';
+import 'package:fleet_ease/utils/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -40,14 +43,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _uploadProfileData(BuildContext context) async {
     try {
-      var uri = Uri.parse("https://your-backend-url.com/api/edit-profile");
+      var uri = Uri.parse(
+          "https://fleet-ease-backend.vercel.app/api/users/edit-profile");
       var request = http.MultipartRequest("POST", uri);
+      final token = await SecureStorageService().getToken();
+
+      // Attach Authorization header
+      request.headers["Authorization"] = "Bearer $token";
 
       // Attach image if selected
       if (_image != null) {
         var mimeType = lookupMimeType(_image!.path);
         request.files.add(await http.MultipartFile.fromPath(
-          "profileImage",
+          "file",
           _image!.path,
           contentType: mimeType != null ? MediaType.parse(mimeType) : null,
         ));
@@ -55,10 +63,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       // Attach name
       request.fields["name"] = _nameController.text;
+      String? name = request.fields["name"];
 
       var response = await request.send();
-      if (response.statusCode == 200) {
-        print("Profile updated successfully");
+      if (response.statusCode == 201) {
+        // Convert StreamedResponse to String
+        String responseBody = await response.stream.bytesToString();
+        // Decode JSON
+        var responseData = json.decode(responseBody);
+
+        // Extract `newUrl`
+        String newUrl = responseData["newUrl"];
+        await SharedPrefsHelper.saveProfilePhoto(newUrl);
+        await SharedPrefsHelper.saveUsername(name!);
         if (context.mounted) {
           Navigator.pop(context);
         }
@@ -85,7 +102,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 backgroundColor: Colors.grey[300],
                 backgroundImage: _image != null ? FileImage(_image!) : null,
                 child: _image == null
-                    ? const Icon(Icons.camera_alt, size: 40, color: Colors.white)
+                    ? const Icon(Icons.camera_alt,
+                        size: 40, color: Colors.white)
                     : null,
               ),
             ),
@@ -99,7 +117,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => _uploadProfileData(context), 
+              onPressed: () => _uploadProfileData(context),
               child: const Text("Save Changes"),
             ),
           ],
@@ -108,7 +126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  void _showImageSourceDialog(BuildContext context) { 
+  void _showImageSourceDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Wrap(

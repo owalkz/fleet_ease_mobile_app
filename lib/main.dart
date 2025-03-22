@@ -177,7 +177,7 @@ void onStart(ServiceInstance service) async {
       }
       await TripService.updateTrip(
         currentTripId,
-        position.speed,
+        position.speed * 3.6,
         position.latitude,
         position.longitude,
         eventType,

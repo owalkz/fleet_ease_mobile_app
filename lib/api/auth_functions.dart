@@ -19,6 +19,7 @@ Future<int> login(String emailAddress, String password, WidgetRef ref) async {
       }),
     );
     final responseData = json.decode(response.body);
+    print(responseData);
     await SecureStorageService().saveUserData(
       responseData['token'],
     );
@@ -29,9 +30,12 @@ Future<int> login(String emailAddress, String password, WidgetRef ref) async {
     SharedPrefsHelper.saveUserDetails(
         responseData['user']['name'],
         responseData['user']['emailAddress'],
-        responseData['user']['accountType']);
+        responseData['user']['accountType'],
+        responseData['user']['profilePhoto']['url'] ?? "",
+        responseData['user']['_id']);
     return response.statusCode;
   } catch (error) {
+    print(error);
     return 500; // Return 500 in case of error
   }
 }

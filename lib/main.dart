@@ -10,7 +10,7 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 import 'package:fleet_ease/app_theme.dart';
 import 'package:fleet_ease/screens/auth.dart';
-import 'package:fleet_ease/utils/trip_service.dart';
+import 'package:fleet_ease/api/trip_functions.dart';
 import 'package:fleet_ease/utils/shared_preferences.dart';
 
 void main() async {
@@ -175,7 +175,7 @@ void onStart(ServiceInstance service) async {
 
         print("⚠️ Detected: $eventType");
       }
-      await TripService.updateTrip(
+      await TripApiService.updateTrip(
         currentTripId,
         position.speed * 3.6,
         position.latitude,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fleet_ease/api/driver_functions.dart';
 import 'package:fleet_ease/api/vehicle_functions.dart';
 import 'package:fleet_ease/models/driver_model.dart';
 
@@ -27,7 +28,7 @@ class _AssignDriverDialogState extends State<AssignDriverDialog> {
   }
 
   Future<void> fetchDrivers() async {
-    final fetchedDrivers = await ApiService.getAvailableDrivers();
+    final fetchedDrivers = await DriverApiService.getAvailableDrivers();
     setState(() {
       drivers = fetchedDrivers;
       isLoading = false;

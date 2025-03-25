@@ -1,7 +1,10 @@
+import 'package:fleet_ease/screens/driver_management.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fleet_ease/screens/trip.dart';
+import 'package:fleet_ease/screens/driver_trip_list.dart';
+import 'package:fleet_ease/screens/manager_trip_list_screen.dart';
 import 'package:fleet_ease/screens/vehicle.dart';
 import 'package:fleet_ease/providers/auth_provider.dart';
 import 'package:fleet_ease/screens/auth.dart';
@@ -12,7 +15,7 @@ import 'package:fleet_ease/utils/shared_preferences.dart';
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.userType});
 
-  final String userType; 
+  final String userType;
 
   @override
   ConsumerState<HomeScreen> createState() {
@@ -32,8 +35,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
-      Text('Home Page'),
-      TripScreen(),
+      widget.userType == 'driver' ? DriverTripsScreen() : TripListScreen(),
+      DriverManagementScreen(),
       VehicleListScreen(userType: widget.userType),
       Profile(),
     ];

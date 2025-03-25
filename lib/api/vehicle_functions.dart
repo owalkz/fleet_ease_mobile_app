@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:fleet_ease/models/vehicle_model.dart';
-import 'package:fleet_ease/models/driver_model.dart';
 import 'package:fleet_ease/utils/secure_storage.dart'; // Import token storage
 
 class ApiService {
@@ -149,26 +148,6 @@ class ApiService {
     } catch (e) {
       print("Error unassigning driver: $e");
       return false;
-    }
-  }
-
-  // ✅ Fetch Available Drivers (Unassigned)
-  static Future<List<DriverModel>> getAvailableDrivers() async {
-    try {
-      final headers = await _getHeaders();
-      final response = await http.get(
-          Uri.parse(
-              "https://fleet-ease-backend.vercel.app/api/users/get-drivers"),
-          headers: headers);
-      if (response.statusCode == 200) {
-        List<dynamic> jsonData = jsonDecode(response.body);
-        return jsonData.map((data) => DriverModel.fromJson(data)).toList();
-      } else {
-        throw Exception("Failed to load drivers");
-      }
-    } catch (e) {
-      print("Error fetching drivers: $e");
-      return [];
     }
   }
 }

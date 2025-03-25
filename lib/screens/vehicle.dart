@@ -19,6 +19,7 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
   List<VehicleModel> vehicles = [];
   bool isLoading = true;
   String? userId = SharedPrefsHelper.getUserId();
+  String? userType = SharedPrefsHelper.getUserAccountType();
 
   @override
   void initState() {
@@ -96,7 +97,7 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
                                   "Assigned to: ${vehicle.assignedDriverName}"),
                           ],
                         ),
-                        trailing: widget.userType == "manager"
+                        trailing: userType == "manager"
                             ? PopupMenuButton<String>(
                                 onSelected: (value) {
                                   if (value == "delete") {
@@ -125,7 +126,7 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
                               )
                             : null,
                         onTap: () {
-                          if (widget.userType == "manager") {
+                          if (userType == "manager") {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -139,7 +140,7 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
                     );
                   },
                 ),
-      floatingActionButton: widget.userType == "manager"
+      floatingActionButton: userType == "manager"
           ? FloatingActionButton(
               onPressed: () {
                 Navigator.push(

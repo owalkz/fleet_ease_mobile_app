@@ -34,8 +34,6 @@ class TripService {
   static Future<void> updateTrip(String tripId, double speed, double lat,
       double lon, String eventType) async {
     try {
-      print("This has been called");
-      print(tripId);
       await http.put(
         Uri.parse("$baseUrl/update-trip/$tripId"),
         headers: {"Content-Type": "application/json"},

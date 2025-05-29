@@ -153,7 +153,7 @@ class _DriverTripsScreenState extends State<DriverTripsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-                "Vehicle: ${trip.vehicle?.make ?? "Unknown"} - ${trip.vehicle?.licensePlateNumber ?? "N/A"}"),
+                "Vehicle: ${trip.vehicleMake} - ${trip.licensePlateNumber}"),
             Text("Deadline: ${DateFormat.yMMMd().format(trip.deadline)}"),
             Text("Status: ${trip.status}"),
           ],

@@ -178,7 +178,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
           IconButton(
             onPressed: () async {
-              ref.watch(userNotifierProvider.notifier).unsetUserDetails();
+              ref.invalidate(userNotifierProvider); // Reset the provider fully
               await SecureStorageService().deleteUserData();
               await SharedPrefsHelper.clearUserDetails();
               Navigator.of(context).pushReplacement(

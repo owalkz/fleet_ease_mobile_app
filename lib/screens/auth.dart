@@ -36,16 +36,22 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   void _checkAuthToken() async {
     final token = await SecureStorageService().getToken();
-    final userDetails = ref.watch(userNotifierProvider);
     if (token != null) {
       setState(() {
         isAuthenticated = true;
       });
+
+      await Future.delayed(const Duration(milliseconds: 300)); // small delay
+
+      final userDetails = ref.read(userNotifierProvider);
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-            builder: (_) => HomeScreen(userType: userDetails.accountType)),
-      );
+
+      if (userDetails.accountType.isNotEmpty) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (_) => HomeScreen(userType: userDetails.accountType)),
+        );
+      }
     }
   }
 
@@ -69,7 +75,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           if (!mounted) return;
           final userDetails = ref.watch(userNotifierProvider);
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => HomeScreen(userType: userDetails.accountType)),
+            MaterialPageRoute(
+                builder: (_) => HomeScreen(userType: userDetails.accountType)),
           );
         } else if (response == 422) {
           ScaffoldMessenger.of(context).showSnackBar(

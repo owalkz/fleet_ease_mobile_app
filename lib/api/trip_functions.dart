@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:fleet_ease/models/trip_model.dart';
 import 'package:fleet_ease/utils/secure_storage.dart';
+import 'package:fleet_ease/models/driver_trip_summary_model.dart';
+import 'package:fleet_ease/models/trip_summary_model.dart';
+import 'package:fleet_ease/models/manager_summary_model.dart';
 
 class TripApiService {
   static const String baseUrl =
@@ -73,11 +76,19 @@ class TripApiService {
   }
 
   // ✅ End Trip (Driver completes the trip)
-  static Future<bool> endTrip(String tripId) async {
+  static Future<bool> endTrip(String tripId, double finalMileage) async {
     try {
       final headers = await _getHeaders();
-      final response = await http.put(Uri.parse("$baseUrl/end-trip/$tripId"),
-          headers: headers);
+      final response = await http.put(
+        Uri.parse("$baseUrl/end-trip/$tripId"),
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "finalMileage": finalMileage,
+        }),
+      );
 
       return response.statusCode == 200;
     } catch (e) {
@@ -119,14 +130,13 @@ class TripApiService {
   }
 
   // ✅ Fetch Trips Assigned to a Manager
-  static Future<List<TripModel>> getManagerTrips(String managerId) async {
+  static Future<List<TripModel>> getManagerTrips() async {
     try {
       final headers = await _getHeaders();
-      final response = await http.get(Uri.parse("$baseUrl/manager/$managerId"),
-          headers: headers);
+      final response =
+          await http.get(Uri.parse("$baseUrl/manager"), headers: headers);
 
       if (response.statusCode == 200) {
-        print(response.body);
         List<dynamic> jsonData = jsonDecode(response.body);
         return jsonData.map((data) => TripModel.fromJson(data)).toList();
       } else {
@@ -214,6 +224,53 @@ class TripApiService {
     } catch (e) {
       print("Error fetching trips approaching deadline: $e");
       return [];
+    }
+  }
+
+  static Future<DriverTripSummary?> fetchDriverTripSummary(
+      String driverId) async {
+    final headers = await _getHeaders();
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/driver-summary/$driverId"),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      return DriverTripSummary.fromJson(jsonDecode(response.body));
+    } else {
+      print("Failed to fetch summary: ${response.body}");
+      return null;
+    }
+  }
+
+  static Future<List<TripSummaryData>> getTripSummaryOverTime(
+      String driverId) async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse("$baseUrl/summary-over-time/$driverId"),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as List;
+      return data.map((json) => TripSummaryData.fromJson(json)).toList();
+    } else {
+      throw Exception("Failed to load trip summary");
+    }
+  }
+
+  static Future<ManagerSummary?> getManagerSummary() async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse("$baseUrl/summary"),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return ManagerSummary.fromJson(data); // ✅ Proper casting
+    } else {
+      throw Exception("Failed to load trip summary");
     }
   }
 }

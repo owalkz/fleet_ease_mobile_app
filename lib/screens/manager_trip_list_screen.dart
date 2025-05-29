@@ -1,10 +1,10 @@
-import 'package:fleet_ease/utils/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleet_ease/api/trip_functions.dart';
 import 'package:fleet_ease/models/trip_model.dart';
 import 'package:fleet_ease/screens/add_trip_screen.dart';
 import 'package:fleet_ease/screens/edit_trip_screen.dart';
+import 'package:fleet_ease/screens/trip_details_screen.dart';
 
 class TripListScreen extends ConsumerStatefulWidget {
   const TripListScreen({super.key});
@@ -16,7 +16,6 @@ class TripListScreen extends ConsumerStatefulWidget {
 class _TripListScreenState extends ConsumerState<TripListScreen> {
   List<TripModel> trips = [];
   bool isLoading = true;
-  String? managerId = SharedPrefsHelper.getUserId();
 
   @override
   void initState() {
@@ -26,7 +25,7 @@ class _TripListScreenState extends ConsumerState<TripListScreen> {
 
   Future<void> fetchTrips() async {
     setState(() => isLoading = true);
-    final fetchedTrips = await TripApiService.getManagerTrips(managerId!);
+    final fetchedTrips = await TripApiService.getManagerTrips();
     setState(() {
       trips = fetchedTrips;
       isLoading = false;
@@ -40,39 +39,44 @@ class _TripListScreenState extends ConsumerState<TripListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Trip Management")),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : trips.isEmpty
-              ? const Center(child: Text("No trips available"))
-              : ListView.builder(
-                  itemCount: trips.length,
-                  itemBuilder: (context, index) {
-                    final trip = trips[index];
-                    return ExpansionTile(
-                      title: Text("Trip #${index + 1} - ${trip.status}"),
-                      subtitle: Text("Driver: ${trip.driverName}"),
-                      children: [
-                        ListTile(
-                          title: Text("Vehicle: ${trip.licensePlateNumber}"),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Destination: ${trip.destination.address}"),
-                              Text("Deadline: ${trip.deadline}"),
-                              Text("Status: ${trip.status}"),
-                            ],
-                          ),
+    return Stack(
+      children: [
+        isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : trips.isEmpty
+                ? const Center(child: Text("No trips available"))
+                : ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    itemCount: trips.length,
+                    itemBuilder: (context, index) {
+                      final trip = trips[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        child: ListTile(
+                          title: Text("Trip #${index + 1} - ${trip.status}"),
+                          subtitle: Text("Driver: ${trip.driverName}"),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TripDetailsScreen(
+                                  trip: trip,
+                                  userType: "manager",
+                                ),
+                              ),
+                            );
+                          },
                           trailing: PopupMenuButton<String>(
                             onSelected: (value) {
                               if (value == "edit") {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          EditTripScreen(trip: trip)),
-                                );
+                                    builder: (context) =>
+                                        EditTripScreen(trip: trip),
+                                  ),
+                                ).then((_) => fetchTrips());
                               } else if (value == "delete") {
                                 deleteTrip(trip.id);
                               }
@@ -89,17 +93,22 @@ class _TripListScreenState extends ConsumerState<TripListScreen> {
                             ],
                           ),
                         ),
-                      ],
-                    );
-                  },
-                ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AddTripScreen()),
+                      );
+                    },
+                  ),
+        // Floating Action Button
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddTripScreen()),
+            ).then((_) => fetchTrips()),
+            child: const Icon(Icons.add),
+          ),
         ),
-        child: const Icon(Icons.add),
-      ),
+      ],
     );
   }
 }

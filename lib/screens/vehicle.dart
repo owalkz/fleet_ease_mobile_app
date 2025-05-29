@@ -1,6 +1,7 @@
-import 'package:fleet_ease/utils/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:fleet_ease/utils/shared_preferences.dart';
 import 'package:fleet_ease/api/vehicle_functions.dart';
 import 'package:fleet_ease/models/vehicle_model.dart';
 import 'package:fleet_ease/screens/add_vehicle_screen.dart';
@@ -40,11 +41,10 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
 
   void deleteVehicle(String vehicleId) async {
     bool success = await ApiService.deleteVehicle(vehicleId);
-    if (success) fetchVehicles(); // Refresh after deletion
+    if (success) fetchVehicles();
   }
 
   void assignDriver(String vehicleId) async {
-    // Implement a driver selection UI instead of hardcoded ID
     String sampleDriverId = "driver123";
     bool success = await ApiService.assignDriver(vehicleId, sampleDriverId);
     if (success) fetchVehicles();
@@ -60,88 +60,92 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
       context: context,
       builder: (context) => AssignDriverDialog(
         vehicleId: vehicleId,
-        onDriverAssigned: fetchVehicles, // Refresh list after assignment
+        onDriverAssigned: fetchVehicles,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : vehicles.isEmpty
-              ? const Center(child: Text("No vehicles available"))
-              : ListView.builder(
-                  itemCount: vehicles.length,
-                  itemBuilder: (context, index) {
-                    final vehicle = vehicles[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          radius: 30,
-                          backgroundImage: vehicle.imageUrl.isNotEmpty
-                              ? NetworkImage(vehicle.imageUrl)
-                              : const AssetImage('assets/placeholder.png')
-                                  as ImageProvider,
+    return Stack(
+      children: [
+        isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : vehicles.isEmpty
+                ? const Center(child: Text("No vehicles available"))
+                : ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    itemCount: vehicles.length,
+                    itemBuilder: (context, index) {
+                      final vehicle = vehicles[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            radius: 30,
+                            backgroundImage: vehicle.imageUrl.isNotEmpty
+                                ? NetworkImage(vehicle.imageUrl)
+                                : const AssetImage('assets/placeholder.png')
+                                    as ImageProvider,
+                          ),
+                          title: Text("${vehicle.make} ${vehicle.model}"),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Status: ${vehicle.status}"),
+                              if (vehicle.assignedDriverId != null)
+                                Text(
+                                    "Assigned to: ${vehicle.assignedDriverName}"),
+                            ],
+                          ),
+                          trailing: userType == "manager"
+                              ? PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    if (value == "delete") {
+                                      deleteVehicle(vehicle.id);
+                                    } else if (value == "assign") {
+                                      showAssignDriverDialog(vehicle.id);
+                                    } else if (value == "unassign") {
+                                      unassignDriver(vehicle.id);
+                                    }
+                                  },
+                                  itemBuilder: (context) => const [
+                                    PopupMenuItem(
+                                      value: "assign",
+                                      child: Text("Assign Driver"),
+                                    ),
+                                    PopupMenuItem(
+                                      value: "unassign",
+                                      child: Text("Unassign Driver"),
+                                    ),
+                                    PopupMenuItem(
+                                      value: "delete",
+                                      child: Text("Delete Vehicle"),
+                                    ),
+                                  ],
+                                )
+                              : null,
+                          onTap: () {
+                            if (userType == "manager") {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      EditVehicleScreen(vehicle: vehicle),
+                                ),
+                              );
+                            }
+                          },
                         ),
-                        title: Text("${vehicle.make} ${vehicle.model}"),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Status: ${vehicle.status}"),
-                            if (vehicle.assignedDriverId != null)
-                              Text(
-                                  "Assigned to: ${vehicle.assignedDriverName}"),
-                          ],
-                        ),
-                        trailing: userType == "manager"
-                            ? PopupMenuButton<String>(
-                                onSelected: (value) {
-                                  if (value == "delete") {
-                                    deleteVehicle(vehicle.id);
-                                  } else if (value == "assign") {
-                                    showAssignDriverDialog(
-                                        vehicle.id); // ✅ Open modal
-                                  } else if (value == "unassign") {
-                                    unassignDriver(vehicle.id);
-                                  }
-                                },
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(
-                                    value: "assign",
-                                    child: Text("Assign Driver"),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: "unassign",
-                                    child: Text("Unassign Driver"),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: "delete",
-                                    child: Text("Delete Vehicle"),
-                                  ),
-                                ],
-                              )
-                            : null,
-                        onTap: () {
-                          if (userType == "manager") {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    EditVehicleScreen(vehicle: vehicle),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
-      floatingActionButton: userType == "manager"
-          ? FloatingActionButton(
+                      );
+                    },
+                  ),
+        if (userType == "manager")
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -150,8 +154,9 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
                 );
               },
               child: const Icon(Icons.add),
-            )
-          : null,
+            ),
+          ),
+      ],
     );
   }
 }

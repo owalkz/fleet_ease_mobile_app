@@ -19,7 +19,6 @@ Future<int> login(String emailAddress, String password, WidgetRef ref) async {
       }),
     );
     final responseData = json.decode(response.body);
-    print(responseData);
     await SecureStorageService().saveUserData(
       responseData['token'],
     );
@@ -32,7 +31,8 @@ Future<int> login(String emailAddress, String password, WidgetRef ref) async {
         responseData['user']['emailAddress'],
         responseData['user']['accountType'],
         responseData['user']['profilePhoto']['url'] ?? "",
-        responseData['user']['_id']);
+        responseData['user']['_id'],
+        responseData['user']['accountStatus'] ?? "");
     return response.statusCode;
   } catch (error) {
     print(error);

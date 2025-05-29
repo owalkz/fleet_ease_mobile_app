@@ -1,5 +1,6 @@
 import 'package:fleet_ease/utils/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleet_ease/api/driver_functions.dart';
 import 'package:fleet_ease/models/driver_model.dart';
@@ -36,7 +37,7 @@ class _DriverManagementScreenState extends ConsumerState<DriverManagementScreen>
 
   void hireDriver(String driverId) async {
     bool success = await DriverApiService.addDriverToCompany(driverId);
-    if (success) fetchDrivers(); // Refresh UI
+    if (success) fetchDrivers();
   }
 
   void removeDriver(String driverId) async {
@@ -46,17 +47,21 @@ class _DriverManagementScreenState extends ConsumerState<DriverManagementScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Manage Drivers"), bottom: _tabBar()),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildDriverList(hiredDrivers, true),
-                _buildDriverList(availableDrivers, false),
-              ],
-            ),
+    return Column(
+      children: [
+        _tabBar(),
+        Expanded(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildDriverList(hiredDrivers, true),
+                    _buildDriverList(availableDrivers, false),
+                  ],
+                ),
+        ),
+      ],
     );
   }
 
@@ -67,6 +72,9 @@ class _DriverManagementScreenState extends ConsumerState<DriverManagementScreen>
         Tab(text: "Hired Drivers"),
         Tab(text: "Available Drivers"),
       ],
+      labelColor: Colors.blue,
+      unselectedLabelColor: Colors.grey,
+      indicatorColor: Colors.blue,
     );
   }
 
@@ -87,7 +95,11 @@ class _DriverManagementScreenState extends ConsumerState<DriverManagementScreen>
                             as ImageProvider,
                   ),
                   title: Text(driver.name),
-                  subtitle: Text("License Expiry: ${driver.licenseExpiryDate}"),
+                  subtitle: Text(
+                    driver.licenseExpiryDate != null
+                        ? "License Expiry: ${DateFormat.yMMMd().format(driver.licenseExpiryDate!)}"
+                        : "License Expiry Not Set",
+                  ),
                   trailing: isHired
                       ? IconButton(
                           icon: const Icon(Icons.remove_circle,

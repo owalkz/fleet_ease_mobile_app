@@ -10,6 +10,7 @@ class SharedPrefsHelper {
   static const String _keyUserAccountType = 'user_account_type';
   static const String keyTripId = 'trip_id';
   static const String _keyUserProfilePhoto = 'profile_photo';
+  static const String _keyAccountStatus = "account_status";
 
   /// Initialize SharedPreferences (must be called before using it)
   static Future<void> init() async {
@@ -18,13 +19,19 @@ class SharedPrefsHelper {
   }
 
   /// Save user details
-  static Future<void> saveUserDetails(String name, String email,
-      String accountType, String profilePhoto, String id) async {
+  static Future<void> saveUserDetails(
+      String name,
+      String email,
+      String accountType,
+      String profilePhoto,
+      String id,
+      String accountStatus) async {
     await _preferences?.setString(_keyUserId, id);
     await _preferences?.setString(_keyUserName, name);
     await _preferences?.setString(_keyUserEmail, email);
     await _preferences?.setString(_keyUserAccountType, accountType);
     await _preferences?.setString(_keyUserProfilePhoto, profilePhoto);
+    await _preferences?.setString(_keyAccountStatus, accountStatus);
   }
 
   /// Save trip id
@@ -45,6 +52,14 @@ class SharedPrefsHelper {
   /// Get user name
   static String? getUserName() {
     return _preferences?.getString(_keyUserName);
+  }
+
+  static Future<void> saveAccountStatus(String status) async {
+    await _preferences?.setString(_keyAccountStatus, status);
+  }
+
+  static String? getAccountStatus() {
+    return _preferences?.getString(_keyAccountStatus);
   }
 
   /// Get user id

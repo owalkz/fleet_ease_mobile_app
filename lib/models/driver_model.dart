@@ -6,7 +6,8 @@ class DriverModel {
   final String accountType;
   final String emailAddress;
   final bool isAssigned;
-  final String? licenseExpiryDate;
+  final String accountStatus;
+  final DateTime? licenseExpiryDate;
   final String profilePhotoUrl;
 
   DriverModel({
@@ -15,6 +16,7 @@ class DriverModel {
     required this.accountType,
     required this.emailAddress,
     required this.isAssigned,
+    required this.accountStatus,
     this.licenseExpiryDate,
     required this.profilePhotoUrl,
   });
@@ -27,7 +29,10 @@ class DriverModel {
       accountType: json["accountType"],
       emailAddress: json["emailAddress"],
       isAssigned: json["isAssigned"],
-      licenseExpiryDate: json["licenseExpiryDate"],
+      accountStatus: json["accountStatus"],
+      licenseExpiryDate: json["licenseExpiryDate"] != null
+          ? DateTime.parse(json["licenseExpiryDate"])
+          : null,
       profilePhotoUrl: json["profilePhoto"]["url"] ?? "",
     );
   }
@@ -40,7 +45,8 @@ class DriverModel {
       "accountType": accountType,
       "emailAddress": emailAddress,
       "isAssigned": isAssigned,
-      "licenseExpiryDate": licenseExpiryDate,
+      "accountStatus": accountStatus,
+      "licenseExpiryDate": licenseExpiryDate?.toIso8601String(),
       "profilePhoto": {
         "url": profilePhotoUrl,
       },

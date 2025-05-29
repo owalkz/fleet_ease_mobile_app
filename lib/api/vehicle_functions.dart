@@ -38,6 +38,25 @@ class ApiService {
     }
   }
 
+  // ✅ Fetch Vehicle (Manager sees all, Driver sees assigned)
+  static Future<VehicleModel?> getVehicle() async {
+    try {
+      final headers = await _getHeaders();
+      final response =
+          await http.get(Uri.parse("$baseUrl/vehicle"), headers: headers);
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        return VehicleModel.fromJson(jsonData);
+      } else {
+        throw Exception("Failed to load vehicle");
+      }
+    } catch (e) {
+      print("Error fetching vehicle: $e");
+      return null;
+    }
+  }
+
   // ✅ Create Vehicle (With Image Upload)
   static Future<bool> createVehicle(
       Map<String, dynamic> vehicleData, File? imageFile) async {

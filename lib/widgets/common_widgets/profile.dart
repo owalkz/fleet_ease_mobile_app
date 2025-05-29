@@ -8,7 +8,13 @@ class Profile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
+    final profilePhoto = SharedPrefsHelper.getUserProfilePhoto();
+    final name = SharedPrefsHelper.getUserName() ?? "User Name";
+    final email = SharedPrefsHelper.getUserEmail() ?? "user@example.com";
+    final accountType =
+        SharedPrefsHelper.getUserAccountType() ?? "Account Type";
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -16,29 +22,23 @@ class Profile extends ConsumerWidget {
           CircleAvatar(
             radius: 60,
             backgroundColor: Colors.blue.withOpacity(0.2),
-            backgroundImage: SharedPrefsHelper.getUserProfilePhoto() != null
-                ? NetworkImage(SharedPrefsHelper.getUserProfilePhoto()!)
-                : null,
-            child: SharedPrefsHelper.getUserProfilePhoto() == null
+            backgroundImage:
+                profilePhoto != null ? NetworkImage(profilePhoto) : null,
+            child: profilePhoto == null
                 ? const Icon(Icons.person, size: 60, color: Colors.blue)
                 : null,
           ),
           const SizedBox(height: 20),
-          Text(
-            SharedPrefsHelper.getUserName() ?? "User Name",
-            style: Theme.of(context).textTheme.displaySmall,
-          ),
+          Text(name, style: Theme.of(context).textTheme.displaySmall),
+          const SizedBox(height: 5),
+          Text(email, style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 5),
           Text(
-            SharedPrefsHelper.getUserEmail() ?? "user@example.com",
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 5),
-          Text(
-            SharedPrefsHelper.getUserAccountType() ?? "Account Type",
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: Colors.grey,
-                ),
+            accountType,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Colors.grey),
           ),
           const SizedBox(height: 40),
           SizedBox(
@@ -48,14 +48,12 @@ class Profile extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const EditProfileScreen()),
+                    builder: (context) => const EditProfileScreen(),
+                  ),
                 );
               },
               icon: const Icon(Icons.edit, size: 20),
-              label: const Text(
-                'Edit Profile',
-                textAlign: TextAlign.center,
-              ),
+              label: const Text('Edit Profile'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 textStyle: const TextStyle(fontSize: 16),

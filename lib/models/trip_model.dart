@@ -53,7 +53,7 @@ class TripModel {
       managerId: json["managerId"] ?? "",
       driverId: json["driverId"]?["_id"] ?? "",
       driverName: json["driverId"]?["name"] ?? "Unknown",
-      driverEmail: json["driverId"]?["email"] ?? "Unknown",
+      driverEmail: json["driverId"]?["emailAddress"] ?? "Unknown",
       vehicleId: json["vehicleId"]?["_id"] ?? "",
       vehicleMake: json["vehicleId"]?["make"] ?? "Unknown",
       vehicleModel: json["vehicleId"]?["model"] ?? "Unknown",
